@@ -1,26 +1,34 @@
-import React from 'react';
-import logo from './logo.svg';
+import React from 'react'
+import { Router, Route, Switch, RouteComponentProps } from 'react-router-dom'
+import 'bootstrap/dist/css/bootstrap.min.css'
+import { createBrowserHistory } from 'history'
+import { CharctersList } from './charactersList'
+import { CharactersPage } from './charactersPage'
+import { CharactersService } from './charactersService'
 import './App.css';
 
 const App: React.FC = () => {
+  const history = createBrowserHistory()
+  const charactersEndpoint = 'https://swapi.co/api'
+  const charactersService = new CharactersService(charactersEndpoint)
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <Router history={history}>
+      <>
+        <Switch>
+          <Route
+            exact
+            path="/list"
+            render={() => <CharctersList charactersService={charactersService}/>}
+          />
+          <Route
+            path="/:id"
+            render={(props: RouteComponentProps<any>) => <CharactersPage charactersService={charactersService} match={props.match} />}
+          />
+          <Route render={() => <div>Welcome</div>} />
+        </Switch>
+      </>
+    </Router>
+  )
 }
 
-export default App;
+export default App
