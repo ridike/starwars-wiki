@@ -1,11 +1,14 @@
+export type Gender = 'male'|'female'|'n.a.'
+
 export interface Character {
   name: string
   height: string
   mass: string
   hair_color: string
   eye_color: string
+  skin_color: string
   birth_year: string
-  gender: string
+  gender: Gender
   homeworld: string
   films: string[]
   species: string[]
@@ -14,10 +17,12 @@ export interface Character {
   created: string
   edited: string
   url: string
+  favorite?: boolean
 }
 
 export interface CharactersData {
   results: Character[]
+  count: number
 }
 
 export class CharactersService {

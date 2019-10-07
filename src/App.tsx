@@ -2,10 +2,26 @@ import React from 'react'
 import { Router, Route, Switch, RouteComponentProps } from 'react-router-dom'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { createBrowserHistory } from 'history'
-import { CharctersList } from './charactersList'
+import { CharactersList } from './charactersList'
 import { CharactersPage } from './charactersPage'
 import { CharactersService } from './charactersService'
-import './App.css';
+import { IconContext } from 'react-icons'
+import Container from 'react-bootstrap/Container'
+import Row from 'react-bootstrap/Row'
+import Col from 'react-bootstrap/Col'
+
+function withinLayout (component: JSX.Element) {
+  return (
+    <IconContext.Provider value={{className: "react-icons"}}>
+      <Container>
+        <Row className="justify-content-md-center mt-8">
+          <Col xl="8" className="mt-3">{component}</Col>
+        </Row>
+      </Container>
+    </IconContext.Provider>
+  )
+}
+
 
 const App: React.FC = () => {
   const history = createBrowserHistory()
@@ -18,11 +34,12 @@ const App: React.FC = () => {
           <Route
             exact
             path="/list"
-            render={() => <CharctersList charactersService={charactersService}/>}
+            render={() => withinLayout(<CharactersList charactersService={charactersService} />)}
           />
           <Route
             path="/:id"
-            render={(props: RouteComponentProps<any>) => <CharactersPage charactersService={charactersService} match={props.match} />}
+            render={(props: RouteComponentProps<any>) =>
+              withinLayout(<CharactersPage charactersService={charactersService} match={props.match} />)}
           />
           <Route render={() => <div>Welcome</div>} />
         </Switch>
