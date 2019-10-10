@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react'
 import { match as RouteMatch } from 'react-router'
-import { CharactersService, Character } from './charactersService'
+import { History } from 'history'
 import Card from 'react-bootstrap/Card'
 import ListGroup from 'react-bootstrap/ListGroup'
 import ListGroupItem from 'react-bootstrap/ListGroupItem'
 import Button from 'react-bootstrap/Button'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
+import Modal from 'react-bootstrap/Modal'
 import { FaStar } from 'react-icons/fa'
+import { CharactersService, Character } from './charactersService'
 import { getColor, Loader, getTextClass, getIcon } from './charactersList'
 
 interface CharactersPageParams {
@@ -17,6 +19,7 @@ interface CharactersPageParams {
 interface CharactersPageProps {
   charactersService: CharactersService
   match: RouteMatch<CharactersPageParams>
+  history: History
 }
 
 export function CharactersPage(props: CharactersPageProps) {
@@ -25,12 +28,18 @@ export function CharactersPage(props: CharactersPageProps) {
   const [character, setCharacter] = useState<Character|null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [favoritesList, setFavoritesList] = useState<string[]>(storedFavoritesString ? JSON.parse(storedFavoritesString) : [])
-
+  const [errorMessage, setErrorMessage] = useState<string>("Server error. Please try again later.")
+  const [error, setError] = useState<boolean>(false)
 
   useEffect(() => {
     async function getCharacterData() {
-      const data = await props.charactersService.getCharacterData(id)
-      setCharacter(data)
+      try {
+        const data = await props.charactersService.getCharacterData(id)
+        setCharacter(data)
+      } catch(e){
+        setErrorMessage(e.message)
+        setError(true)
+      }
       setLoading(false)
     }
     getCharacterData()
@@ -54,13 +63,23 @@ export function CharactersPage(props: CharactersPageProps) {
     setFavoritesList(newFavorites)
   }
 
+  function handleCloseModal() {
+    setError(false)
+    props.history.replace('/characters/list')
+  }
+
   return (
     <>
       <div className="mb-3" style={{ width: '28rem' }}>
-        <a href="/list" className="text-secondary">{`<`} Back to the list</a>
+        <a href="/characters/list" className="text-secondary">{`<`} Back to the list</a>
       </div>
       {!!loading && <Loader/>}
-      {!loading &&
+      <Modal show={error} onHide={handleCloseModal}>
+        <Modal.Header closeButton>
+          <Modal.Title><p className="text-danger">{errorMessage}</p></Modal.Title>
+        </Modal.Header>
+      </Modal>
+      {!loading && !error &&
         <>
           {!!character ?
             <Card border={getColor(character.gender)}>
@@ -81,7 +100,7 @@ export function CharactersPage(props: CharactersPageProps) {
                   </Col>
                 </Card.Title>
               </Card.Body>
-              <ListGroup className="list-group-flush">
+              <ListGroup className="list-group-flush mx-2">
                 <ListGroupItem>Height: {character.height}</ListGroupItem>
                 <ListGroupItem>Mass: {character.mass}</ListGroupItem>
                 <ListGroupItem>Hair color: {character.hair_color}</ListGroupItem>

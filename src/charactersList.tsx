@@ -5,9 +5,9 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import ListGroup from 'react-bootstrap/ListGroup'
 import Spinner from 'react-bootstrap/Spinner'
+import Modal from 'react-bootstrap/Modal'
 import { FaVenus, FaMars, FaGenderless, FaStar } from 'react-icons/fa'
 import { CharactersService, Character, Gender } from './charactersService'
-import './style.css'
 
 interface CharactersListProps {
   charactersService: CharactersService
@@ -15,9 +15,11 @@ interface CharactersListProps {
 
 export function Loader() {
   return (
-    <Spinner animation="border" role="status">
-      <span className="sr-only">Loading...</span>
-    </Spinner>
+    <div style={{textAlign: "center"}} className="mt-5">
+      <Spinner animation="grow" variant="dark" style={{width: "100px", height: "100px"}}>
+        <span className="sr-only">Loading...</span>
+      </Spinner>
+    </div>
   )
 }
 
@@ -58,13 +60,20 @@ export function CharactersList(props: CharactersListProps) {
   const [loading, setLoading] = useState<boolean>(true)
   const [favoritesList, setFavoritesList] = useState<string[]>(storedFavoritesString ? JSON.parse(storedFavoritesString) : [])
   const [count, setCount] = useState<number>(0)
+  const [errorMessage, setErrorMessage] = useState<string>("Server error. Please try again later.")
+  const [error, setError] = useState<boolean>(false)
 
   useEffect(() => {
     async function getList() {
-      const data = await props.charactersService.getCharacters()
-      const characters = data.results
-      setCount(data.count)
-      setCharacters(characters)
+      try {
+        const data = await props.charactersService.getCharacters()
+        const characters = data.results
+        setCount(data.count)
+        setCharacters(characters)
+      } catch(e){
+        setErrorMessage(e.message)
+        setError(true)
+      }
       setLoading(false)
     }
     getList()
@@ -95,11 +104,15 @@ export function CharactersList(props: CharactersListProps) {
 
   return (
     <>
-      <h1>Star Wars People's wiki</h1>
       {!!loading && <Loader/>}
-      {!loading &&
+      <Modal show={error} onHide={() => setError(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title><p className="text-danger">{errorMessage}</p></Modal.Title>
+        </Modal.Header>
+      </Modal>
+      {!loading && !error &&
         <>
-          <p>Here you can see the first page of the list of {count} characters</p>
+          <h3>Here you can see the first part of the list of {count} characters</h3>
           <Form>
             <Form.Group as={Row} controlId="search">
               <Col xs="6" lg="3" className="pr-1">
@@ -127,7 +140,7 @@ export function CharactersList(props: CharactersListProps) {
                       <Col xs={1}>{isFav && <FaStar className='text-warning'/>}</Col>
                       <Col>{getIcon(ch.gender)}<span className={getTextClass(ch.gender)}>{ch.name}</span></Col>
                       <Col xs={1}>
-                        <Button href={`/${generateId(ch)}`} size='sm' variant="light">View</Button>
+                        <Button href={`/characters/${generateId(ch)}`} size='sm' variant="light">View</Button>
                       </Col>
                       <Col xs={3}>
                         { isFav ?

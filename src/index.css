@@ -11,3 +11,8 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.react-icons {
+  vertical-align: middle;
+  margin: 0 .3em;
+}

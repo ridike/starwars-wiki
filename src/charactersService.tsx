@@ -46,7 +46,7 @@ export class CharactersService {
       method: 'GET',
     })
     if (!response.ok) {
-      throw new Error('Unable to fetch characters')
+      throw new Error('Unable to fetch character data')
     }
     const data = await response.json()
     return data
